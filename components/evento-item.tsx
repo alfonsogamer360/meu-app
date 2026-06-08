@@ -31,19 +31,20 @@ export default function EventoItem() {
         </View>
         <View style={styles.icone}>
           <Ticket size={14} color='gray'/>
-          <Text style={styles.texto}>${evento.valor.toLocaleString()}</Text>
+          <Text style={styles.texto}>R$ {evento.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</Text>
         </View>
       </View>
       <View style={styles.reserva}>
         <View style={styles.contador}>
           <Button title="+" onPress={() => setQuantidade(quantidade + 1)} />
           <Text style={styles.quantidade}>{quantidade}</Text>
-          <Button title="-" onPress={() => setQuantidade(quantidade - 1)} />
+          {/* Validação: Só subtrai se for maior que zero, senão mantém zero */}
+          <Button title="-" onPress={() => setQuantidade(quantidade > 0 ? quantidade - 1 : 0)} />
         </View>
         <View>
           <Button
             title="reservar"
-            onPress={() => Alert.alert('Reservar efetuada com sucesso')}
+            onPress={() => Alert.alert('Reserva efetuada com sucesso')}
           />
         </View>
       </View>
@@ -54,6 +55,7 @@ export default function EventoItem() {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'column',
+    backgroundColor: 'white', // Corrigido aqui
   },
   evento: {
     flexDirection: 'column',
@@ -70,7 +72,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   imagem: {
-    width: 500,
+    width: '100%', // Alterado para ocupar a largura total de forma responsiva
     height: 200,
   },
   icone: {
