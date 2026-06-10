@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function ModalScreen() {
@@ -8,15 +8,53 @@ export default function ModalScreen() {
   // Estados para gerenciar as entradas do formulário
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
-  const [imagem, setImagem] = useState('');
-  const [data, setData] = useState('');
   const [local, setLocal] = useState('');
+  const [data, setData] = useState('');
   const [valor, setValor] = useState('');
 
-  // Função ao clicar em confirmar
-  const handleConfirmar = () => {
-    if (!titulo || !descricao || !local || !data || !valor) {
-      Alert.alert('Atenção', 'Por favor, preencha todos os campos obrigatórios.');
+  const validarTitulo = () => titulo.trim().length >= 3 && titulo.trim().length <= 256;
+  const validarDescricao = () => descricao.trim().length >= 3 && descricao.trim().length <= 256;
+  const validarLocal = () => local.trim().length >= 3 && local.trim().length <= 256;
+  const validarData = () => {
+    const dataInformada = new Date(data);
+    const agora = new Date();
+    const umAnoDepois = new Date(agora);
+    umAnoDepois.setFullYear(agora.getFullYear() + 1);
+
+    return (
+      !Number.isNaN(dataInformada.getTime()) &&
+      dataInformada > agora &&
+      dataInformada < umAnoDepois
+    );
+  };
+  const validarValor = () => {
+    const valorNumero = Number(valor.replace(',', '.'));
+    return !Number.isNaN(valorNumero) && valorNumero > 1 && valorNumero < 1000;
+  };
+
+  const onSubmit = () => {
+    if (!validarTitulo()) {
+      Alert.alert('Atenção', 'O título precisa ter entre 3 e 256 caracteres.');
+      return;
+    }
+
+    if (!validarDescricao()) {
+      Alert.alert('Atenção', 'A descrição precisa ter entre 3 e 256 caracteres.');
+      return;
+    }
+
+    if (!validarLocal()) {
+      Alert.alert('Atenção', 'O local precisa ter entre 3 e 256 caracteres.');
+      return;
+    }
+
+    if (!validarData()) {
+      Alert.alert('Atenção', 'A data precisa ser maior que hoje e menor que 1 ano. Use o formato YYYY-MM-DD.');
+      return;
+    }
+
+    if (!validarValor()) {
+      Alert.alert('Atenção', 'O valor precisa ser maior que R$1,00 e menor que R$1.000,00.');
       return;
     }
 
@@ -24,13 +62,13 @@ export default function ModalScreen() {
     router.back();
   };
 
-  const handleCancelar = () => {
+  const onCancel = () => {
     router.back();
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.header}>Modal</Text>
+      <Text style={styles.header}>Incluir evento</Text>
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Título</Text>
@@ -45,20 +83,12 @@ export default function ModalScreen() {
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Descrição</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, styles.textArea]}
           placeholder="Informe a descrição"
           value={descricao}
           onChangeText={setDescricao}
-        />
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Imagem (URL)</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Insira a URL da imagem"
-          value={imagem}
-          onChangeText={setImagem}
+          multiline
+          numberOfLines={3}
         />
       </View>
 
@@ -76,13 +106,12 @@ export default function ModalScreen() {
         <Text style={styles.label}>Data</Text>
         <TextInput
           style={styles.input}
-          placeholder="Informe a data"
+          placeholder="Informe a data (YYYY-MM-DD)"
           value={data}
           onChangeText={setData}
         />
       </View>
 
-      {/* Campo: Valor */}
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Valor</Text>
         <TextInput
@@ -94,13 +123,12 @@ export default function ModalScreen() {
         />
       </View>
 
-      {/* Bloco de Botões de Ação */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={[styles.btn, styles.btnCancelar]} onPress={handleCancelar}>
+        <TouchableOpacity style={[styles.btn, styles.btnCancelar]} onPress={onCancel}>
           <Text style={styles.btnText}>cancelar</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.btn, styles.btnConfirmar]} onPress={handleConfirmar}>
+        <TouchableOpacity style={[styles.btn, styles.btnConfirmar]} onPress={onSubmit}>
           <Text style={styles.btnText}>confirmar</Text>
         </TouchableOpacity>
       </View>
@@ -119,6 +147,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+    color: '#333',
   },
   inputGroup: {
     marginBottom: 15,
@@ -134,9 +163,14 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 5,
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 10,
     fontSize: 14,
     color: '#000',
+    backgroundColor: '#fff',
+  },
+  textArea: {
+    minHeight: 80,
+    textAlignVertical: 'top',
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -146,7 +180,7 @@ const styles = StyleSheet.create({
   },
   btn: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderRadius: 5,
     alignItems: 'center',
     borderWidth: 1,
@@ -162,5 +196,6 @@ const styles = StyleSheet.create({
   btnText: {
     fontSize: 14,
     color: '#333',
+    textTransform: 'uppercase',
   },
 });
