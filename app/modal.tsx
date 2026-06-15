@@ -5,7 +5,6 @@ import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View 
 export default function ModalScreen() {
   const router = useRouter();
 
-  // Estados para gerenciar as entradas do formulário
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
   const [local, setLocal] = useState('');
