@@ -2,35 +2,39 @@ import { Calendar, MapPin, Share, Ticket } from 'lucide-react-native';
 import { useState } from 'react';
 import { Alert, Button, Image, StyleSheet, Text, View } from 'react-native';
 
-export default function EventoItem() {
-  const evento = {
-    titulo: "Pesca da Tainha",
-    imagem: "https://static.ndmais.com.br/2023/03/pesca-da-tainha-lagoinha-do-norte-leo-munhoz-8267-scaled.jpg",
-    descricao: "A pesca da tainha será intensa no Pântano do Sul",
-    local: "Pântano do Sul",
-    data: "30/Maio",
-    valor: 100
-  }
-
+export default function EventoItem({
+  titulo,
+  descricao,
+  imagem,
+  data,
+  local,
+  valor
+})
+{
   const [quantidade, setQuantidade] = useState(1);
   
   return (
     <View style={styles.container}>
       <View style={styles.evento}>
-        <Image style={styles.imagem} source={{uri: evento.imagem}}/>
-        <Text style={styles.titulo}>{evento.titulo}</Text>
-        <Text style={styles.descricao}>{evento.descricao}</Text>
+        <Image style={styles.imagem} source={{uri: imagem}}/>
+        <Text style={styles.titulo}>{titulo}</Text>
+        <Text style={styles.descricao}>{descricao}</Text>
         <View style={styles.icone}>
           <Calendar size={20} color='gray'/>
-          <Text style={styles.texto}>{evento.data}</Text>
+          <Text style={styles.texto}>{data}</Text>
         </View>
         <View style={styles.icone}>
           <MapPin size={20} color='gray'/>
-          <Text style={styles.texto}>Quando: {evento.data}</Text>
+          <Text style={styles.texto}>Quando: {data}</Text>
         </View>
+           <View style={styles.icone}>
+      <MapPin size={14} color="gray" />
+      <Text style={styles.texto}>{local}</Text>
+    </View>
+
         <View style={styles.icone}>
           <Ticket size={20} color='gray'/>
-          <Text style={styles.texto}>Valor: R$ {evento.valor}</Text>
+          <Text style={styles.texto}>Valor: R$ {valor}</Text>
         </View>
         <View style={styles.icone}>
           <Share size={20} color='gray'/>
@@ -83,7 +87,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 200,
     borderRadius: 12,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#f5f5f5',
   },
   titulo: {
     fontSize: 28,

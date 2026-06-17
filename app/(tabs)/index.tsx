@@ -1,4 +1,5 @@
 import Clima from "@/components/clima";
+import EventoLista from "@/components/evento-lista";
 import EventoItem from "@/components/evento-item";
 import { useRouter } from "expo-router";
 import { Plus } from "lucide-react-native";
@@ -25,7 +26,7 @@ export default function HomeScreen() {
 
         <Clima />
         <Text style={styles.titulo}>Próximos eventos</Text>
-        <EventoItem />
+        <EventoLista />
       </ScrollView>
     </SafeAreaView>
   );
