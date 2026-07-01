@@ -1,64 +1,80 @@
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
+dayjs.extend(customParseFormat);
 
 export default function ModalScreen() {
   const router = useRouter();
 
   const [titulo, setTitulo] = useState('');
+  const [tituloErro, setTituloErro] = useState('');
+
   const [descricao, setDescricao] = useState('');
+  const [descricaoErro, setDescricaoErro] = useState('');
+
   const [local, setLocal] = useState('');
+  const [localErro, setLocalErro] = useState('');
+
   const [data, setData] = useState('');
+  const [dataErro, setDataErro] = useState('');
+
   const [valor, setValor] = useState('');
+  const [valorErro, setValorErro] = useState('');
 
-  const validarTitulo = () => titulo.trim().length >= 3 && titulo.trim().length <= 256;
-  const validarDescricao = () => descricao.trim().length >= 3 && descricao.trim().length <= 256;
-  const validarLocal = () => local.trim().length >= 3 && local.trim().length <= 256;
-  const validarData = () => {
-    const dataInformada = new Date(data);
-    const agora = new Date();
-    const umAnoDepois = new Date(agora);
-    umAnoDepois.setFullYear(agora.getFullYear() + 1);
-
-    return (
-      !Number.isNaN(dataInformada.getTime()) &&
-      dataInformada > agora &&
-      dataInformada < umAnoDepois
-    );
+  const limparErros = () => {
+    setTituloErro('');
+    setDescricaoErro('');
+    setLocalErro('');
+    setDataErro('');
+    setValorErro('');
   };
-  const validarValor = () => {
+
+  const isFormularioComErro = () => {
+    let isCampoInvalido = false;
+
+    if (titulo.trim().length < 3 || titulo.trim().length > 256) {
+      setTituloErro('Título deve ter entre 3 e 256 caracteres');
+      isCampoInvalido = true;
+    }
+
+    if (descricao.trim().length < 3 || descricao.trim().length > 256) {
+      setDescricaoErro('Descrição deve ter entre 3 e 256 caracteres');
+      isCampoInvalido = true;
+    }
+
+    if (local.trim().length < 3 || local.trim().length > 256) {
+      setLocalErro('Local deve ter entre 3 e 256 caracteres');
+      isCampoInvalido = true;
+    }
+
+    const dataInformada = dayjs(data, ['DD/MM/YYYY', 'YYYY-MM-DD'], true);
+    const dataAtual = dayjs();
+    const dataMaxima = dayjs().add(1, 'year');
+
+    if (!dataInformada.isValid() || dataInformada.isBefore(dataAtual, 'day') || dataInformada.isAfter(dataMaxima, 'day')) {
+      setDataErro(`Data deve ser maior que ${dataAtual.format('DD/MM/YYYY')} e menor que ${dataMaxima.format('DD/MM/YYYY')}`);
+      isCampoInvalido = true;
+    }
+
     const valorNumero = Number(valor.replace(',', '.'));
-    return !Number.isNaN(valorNumero) && valorNumero > 1 && valorNumero < 1000;
+    if (Number.isNaN(valorNumero) || valorNumero < 1 || valorNumero > 1000) {
+      setValorErro('Valor deve ter entre R$1 e R$1000');
+      isCampoInvalido = true;
+    }
+
+    return isCampoInvalido;
   };
 
   const onSubmit = () => {
-    if (!validarTitulo()) {
-      Alert.alert('Atenção', 'O título precisa ter entre 3 e 256 caracteres.');
-      return;
-    }
+    limparErros();
 
-    if (!validarDescricao()) {
-      Alert.alert('Atenção', 'A descrição precisa ter entre 3 e 256 caracteres.');
-      return;
+    if (!isFormularioComErro()) {
+      Alert.alert('Sucesso', 'Evento cadastrado com sucesso!');
+      router.back();
     }
-
-    if (!validarLocal()) {
-      Alert.alert('Atenção', 'O local precisa ter entre 3 e 256 caracteres.');
-      return;
-    }
-
-    if (!validarData()) {
-      Alert.alert('Atenção', 'A data precisa ser maior que hoje e menor que 1 ano. Use o formato YYYY-MM-DD.');
-      return;
-    }
-
-    if (!validarValor()) {
-      Alert.alert('Atenção', 'O valor precisa ser maior que R$1,00 e menor que R$1.000,00.');
-      return;
-    }
-
-    Alert.alert('Sucesso', 'Evento cadastrado com sucesso!');
-    router.back();
   };
 
   const onCancel = () => {
@@ -75,8 +91,12 @@ export default function ModalScreen() {
           style={styles.input}
           placeholder="Digite o título do evento"
           value={titulo}
-          onChangeText={setTitulo}
+          onChangeText={(texto) => {
+            setTitulo(texto);
+            if (tituloErro) setTituloErro('');
+          }}
         />
+        {tituloErro ? <Text style={styles.errorText}>{tituloErro}</Text> : null}
       </View>
 
       <View style={styles.inputGroup}>
@@ -85,10 +105,14 @@ export default function ModalScreen() {
           style={[styles.input, styles.textArea]}
           placeholder="Informe a descrição"
           value={descricao}
-          onChangeText={setDescricao}
+          onChangeText={(texto) => {
+            setDescricao(texto);
+            if (descricaoErro) setDescricaoErro('');
+          }}
           multiline
           numberOfLines={3}
         />
+        {descricaoErro ? <Text style={styles.errorText}>{descricaoErro}</Text> : null}
       </View>
 
       <View style={styles.inputGroup}>
@@ -97,18 +121,26 @@ export default function ModalScreen() {
           style={styles.input}
           placeholder="Informe o local"
           value={local}
-          onChangeText={setLocal}
+          onChangeText={(texto) => {
+            setLocal(texto);
+            if (localErro) setLocalErro('');
+          }}
         />
+        {localErro ? <Text style={styles.errorText}>{localErro}</Text> : null}
       </View>
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Data</Text>
         <TextInput
           style={styles.input}
-          placeholder="Informe a data (YYYY-MM-DD)"
+          placeholder="Informe a data (DD/MM/YYYY)"
           value={data}
-          onChangeText={setData}
+          onChangeText={(texto) => {
+            setData(texto);
+            if (dataErro) setDataErro('');
+          }}
         />
+        {dataErro ? <Text style={styles.errorText}>{dataErro}</Text> : null}
       </View>
 
       <View style={styles.inputGroup}>
@@ -118,8 +150,12 @@ export default function ModalScreen() {
           placeholder="Informe o valor"
           keyboardType="numeric"
           value={valor}
-          onChangeText={setValor}
+          onChangeText={(texto) => {
+            setValor(texto);
+            if (valorErro) setValorErro('');
+          }}
         />
+        {valorErro ? <Text style={styles.errorText}>{valorErro}</Text> : null}
       </View>
 
       <View style={styles.buttonContainer}>
@@ -170,6 +206,11 @@ const styles = StyleSheet.create({
   textArea: {
     minHeight: 80,
     textAlignVertical: 'top',
+  },
+  errorText: {
+    marginTop: 4,
+    fontSize: 12,
+    color: 'red',
   },
   buttonContainer: {
     flexDirection: 'row',
