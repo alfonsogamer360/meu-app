@@ -1,8 +1,10 @@
-import React from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { FlatList } from 'react-native';
+import { consultarEventos } from '../services/api-service';
 import EventoItem from './evento-item';
 
-const eventos = [
+const eventosIniciais = [
   {
     id: '1',
     titulo: 'Pesca da Tainha',
@@ -34,6 +36,26 @@ const eventos = [
   }
 ];
 export default function EventoLista() {
+  const [eventos, setEventos] = useState(eventosIniciais);
+
+  const carregarEventos = useCallback(async () => {
+    try {
+      const dados = await consultarEventos();
+
+      if (Array.isArray(dados) && dados.length > 0) {
+        setEventos(dados);
+      }
+    } catch (error) {
+      console.error('Erro ao consultar eventos:', error);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      carregarEventos();
+    }, [carregarEventos])
+  );
+
   return (
     <FlatList
       data={eventos}
@@ -41,13 +63,13 @@ export default function EventoLista() {
         <EventoItem
           titulo={item.titulo}
           descricao={item.descricao}
-          imagem={item.imagem}
+          imagem={item.imagem || 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=80'}
           local={item.local}
           data={item.data}
           valor={item.valor}
         />
       )}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item) => item.id?.toString() ?? item.id?.toString() ?? `${item.titulo}-${Math.random()}`}
     />
   );
 }

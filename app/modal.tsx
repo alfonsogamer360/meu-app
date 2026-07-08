@@ -3,6 +3,7 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { criarEvento } from '../services/api-service';
 
 dayjs.extend(customParseFormat);
 
@@ -68,12 +69,27 @@ export default function ModalScreen() {
     return isCampoInvalido;
   };
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     limparErros();
 
     if (!isFormularioComErro()) {
-      Alert.alert('Sucesso', 'Evento cadastrado com sucesso!');
-      router.back();
+      try {
+        const evento = {
+          titulo,
+          descricao,
+          local,
+          data,
+          valor: Number(valor.replace(',', '.')),
+        };
+
+        await criarEvento(evento);
+
+        Alert.alert('Sucesso', 'Evento cadastrado com sucesso!');
+        router.back();
+      } catch (error) {
+        console.error('Erro ao criar evento:', error);
+        Alert.alert('Erro', 'Não foi possível cadastrar o evento. Tente novamente.');
+      }
     }
   };
 
